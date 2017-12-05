@@ -29,16 +29,31 @@ namespace MvcMovie.Controllers
 
             var movies = from m in _context.Movie
                 select m;
-
+            // this next bit is very important, this stops the filter from pass on a empty database, that can't be searched.
             if (!String.IsNullOrEmpty(searchString))
             {
-                movies = movies.Where(s => s.Title.Contains(searchString));
+                var result = movies.Where(s => s.Title.Contains(searchString));
+
+                // the main part of this is the Any method, it runs a loop, going throght each search type, with out changeing the database.
+                if (result.Any())
+                {
+                    movies = movies.Where(s => s.Title.Contains(searchString));
+                }
             }
 
             if (!String.IsNullOrEmpty(movieGenre))
             {
                 movies = movies.Where(x => x.Genre == movieGenre);
+            }// Only one of these , search for "Price OR ReleaseDate" can be used at a time, as both are looking for a number
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                movies = movies.Where(d => d.ReleaseDate.ToString().Contains(searchString));
             }
+            // Only one of these , search for "Price OR ReleaseDate" can be used at a time, as both are looking for a number
+            //if (!string.IsNullOrEmpty(searchString))
+            //{
+            //    movies = movies.Where(p => p.Price.ToString().Contains(searchString));
+            //}
 
             var movieGenreVM = new MovieGenreViewModel();
             movieGenreVM.genres = new SelectList(await genreQuery.Distinct().ToListAsync());
@@ -47,7 +62,7 @@ namespace MvcMovie.Controllers
             return View(movieGenreVM);
 
         }
-
+        
         // GET: Movies/Details/5
         public async Task<IActionResult> Details(int? id)
         {
