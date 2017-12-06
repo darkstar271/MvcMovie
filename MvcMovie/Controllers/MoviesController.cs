@@ -29,6 +29,7 @@ namespace MvcMovie.Controllers
 
             var movies = from m in _context.Movie
                 select m;
+
             // this next bit is very important, this stops the filter from pass on a empty database, that can't be searched.
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -59,10 +60,19 @@ namespace MvcMovie.Controllers
             movieGenreVM.genres = new SelectList(await genreQuery.Distinct().ToListAsync());
             movieGenreVM.movies = await movies.ToListAsync();
 
+
+            // This part sets up a variable "MovTot" to store the value of how many movies there are, using  "Count" then sending it to index by ViewBag, 
+            var MovTot = movies.Count();
+            ViewBag.Count = MovTot;
             return View(movieGenreVM);
 
         }
-        
+
+        //public Mcount()
+        //{
+        //    movies = movies.Where(s => s.Title.Contains(searchString));
+        //    int MovTot = Movie.Count(c => c.City == "London");
+        //}
         // GET: Movies/Details/5
         public async Task<IActionResult> Details(int? id)
         {
